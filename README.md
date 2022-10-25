@@ -11,7 +11,11 @@ cd ~/catkin_ws
 catkin build
 ```
 
-## spot_arm_interface Usage
+## spot_arm_interface
+
+This is a ROS package for controlling the Spot arm from a stream of `geometry_msgs/PoseStamped` messages, such as from a Hololens 2 or published by the user.
+
+### Usage
 
 First the `spot_ros` driver must be running on the robot.
 
@@ -22,7 +26,48 @@ roslaunch spot_arm_interface spot_arm_interface.launch input_poses:=<pose_topic_
 
 ## External Software
 
-### Spot simulation
+### Spot-Arm
+
+#### Prerequisites
+
+```bash
+sudo apt install ros-noetic-moveit
+```
+
+#### Build
+
+```bash
+cd ~/catkin_ws/src
+git clone git@github.com:estherRay/Spot-Arm.git
+cd ~/catkin_ws
+catkin build
+```
+
+#### Usage
+
+We are still working out the usage for this package. To launch the demo with gazebo + rviz:
+```bash
+roslaunch spot_moveit_config demo_gazebo.launch
+```
+
+To launch with without gazebo:
+```bash
+roslaunch spot_moveit_config demo.launch
+```
+
+**Known Issue**: in the Gazebo version, executation fails with an error like:
+```
+[ERROR] [1666736964.727028347, 25.118000000]: Unable to identify any set of controllers that can actuate the specified joints: [ Rev10 Rev11 Rev3 Rev6 Rev8 Rev9 ]
+[ERROR] [1666736964.727042432, 25.118000000]: Known controllers and their joints:
+
+[ INFO] [1666736964.738207870, 25.130000000]: ABORTED: Solution found but controller failed during execution
+```
+
+### spot_simulation
+
+#### Prerequisites
+
+
 
 #### Install
 
