@@ -13,6 +13,8 @@ catkin build
 
 ## spot_arm_interface Usage
 
+First the `spot_ros` driver must be running on the robot.
+
 Replacing `<pose_topic_name>` with your input pose topic:
 ```bash
 roslaunch spot_arm_interface spot_arm_interface.launch input_poses:=<pose_topic_name>
@@ -48,13 +50,19 @@ If you work with Noetic ROS distro, you need to patch the `spot_simulation/rs_de
 
 #### Usage
 
-You can test the correctness of the setup by running two commands in separate terminals (make sure the HQ is ready before spawning the robot):
+To launch the simulation environment:
 ```bash
 roslaunch rs_gazebo HQ.launch
 ```
 
+Once HQ is ready, spawn robot with:
 ```bash
 roslaunch rs_gazebo robot.launch
+```
+
+For various control operations, consult the [Control README Section](https://github.com/SoftServeSAG/spot_simulation/tree/spot_control#control). For example:
+```bash
+roslaunch rs_control talker.launch 
 ```
 
 ### WSL2 Setup
