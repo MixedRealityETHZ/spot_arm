@@ -1,0 +1,7 @@
+<launch>
+    <arg name="input_poses" default="input_poses"/>
+
+    <node pkg="spot_arm_interface" type="spot_arm_interface" name="spot_arm_interface" output="screen">
+        <remap from="~input_poses"    to="$(arg input_poses)"/>
+    </node>
+</launch>

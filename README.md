@@ -11,6 +11,13 @@ cd ~/catkin_ws
 catkin build
 ```
 
+## spot_arm_interface Usage
+
+Replacing `<pose_topic_name>` with your input pose topic:
+```bash
+roslaunch spot_arm_interface spot_arm_interface.launch input_poses:=<pose_topic_name>
+```
+
 ## External Software
 
 ### Spot simulation
