@@ -29,7 +29,7 @@ roslaunch spot_arm_interface spot_arm_interface.launch input_poses:=<pose_topic_
 sudo apt install ros-$(rosversion -d)-effort-controllers \
                  ros-$(rosversion -d)-joint-state-controller \
                  ros-$(rosversion -d)-joint-state-publisher-gui \
-                 ros-$(rosversion -d)-interactive-marker-twist-server \ 
+                 ros-$(rosversion -d)-interactive-marker-twist-server \
                  ros-$(rosversion -d)-robot-state-publisher \
                  ros-$(rosversion -d)-teleop-legged-robots
 ```
