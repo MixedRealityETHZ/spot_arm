@@ -1,6 +1,10 @@
 # spot_arm
 Tele-operation of Spot Robot arm using Hololens 2
 
+## Prerequisities
+
+* `spot_ros`
+
 ## Build
 
 Clone this repository to your `catkin_ws`:
