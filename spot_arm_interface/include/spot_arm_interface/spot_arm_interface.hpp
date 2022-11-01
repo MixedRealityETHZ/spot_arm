@@ -1,7 +1,7 @@
 #ifndef SPOT_ARM_INTERFACE_SPOT_ARM_INTERFACE_HPP
 #define SPOT_ARM_INTERFACE_SPOT_ARM_INTERFACE_HPP
 
-#include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/Pose.h>
 #include <ros/ros.h>
 
 namespace spot_arm_interface {
@@ -11,7 +11,7 @@ public:
     SpotArmInterface();
 
 private:
-    void request_hand_pose(const geometry_msgs::PoseStamped::ConstPtr& pose_stamped);
+    void request_hand_pose(const geometry_msgs::Pose::ConstPtr& pose_stamped);
 
     ros::NodeHandle nh;
     ros::Subscriber pose_subscriber;

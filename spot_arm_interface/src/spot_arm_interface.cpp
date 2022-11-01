@@ -8,7 +8,7 @@ SpotArmInterface::SpotArmInterface()
     : nh("~") {
     // Subscriber to pose messages
     pose_subscriber =
-            nh.subscribe<geometry_msgs::PoseStamped>("input_poses", 1, &SpotArmInterface::request_hand_pose, this);
+            nh.subscribe<geometry_msgs::Pose>("input_poses", 1, &SpotArmInterface::request_hand_pose, this);
 
     // Create service client
     const std::string hand_pose_service_name{"/spot/gripper_pose"};
@@ -20,9 +20,9 @@ SpotArmInterface::SpotArmInterface()
     ROS_INFO_STREAM("Connected to HandPose service  \'" << hand_pose_service_name << "\'!");
 }
 
-void SpotArmInterface::request_hand_pose(const geometry_msgs::PoseStamped::ConstPtr& pose_stamped) {
+void SpotArmInterface::request_hand_pose(const geometry_msgs::Pose::ConstPtr& pose) {
     spot_msgs::HandPose::Request request;
-    request.pose_point = pose_stamped->pose;
+    request.pose_point = *pose;
     spot_msgs::HandPose::Response response;
     if (!hand_pose_client.call(request, response)) {
         ROS_ERROR_STREAM("Failed to call service. Service validity: " << hand_pose_client.isValid() ? "True" : "False");
