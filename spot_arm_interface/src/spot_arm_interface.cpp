@@ -18,6 +18,20 @@ SpotArmInterface::SpotArmInterface()
         throw std::runtime_error("Failed to connect to HandPose service \'" + hand_pose_service_name + "\'");
     }
     ROS_INFO_STREAM("Connected to HandPose service  \'" << hand_pose_service_name << "\'!");
+    ROS_INFO_STREAM("Moving to starting pose.");
+    spot_msgs::HandPose::Request request;
+    request.pose_point.position.x = 0.7;
+    request.pose_point.position.y = 0.0;
+    request.pose_point.position.z = 0.5;
+    request.pose_point.orientation.w = 1.0;
+    request.pose_point.orientation.x = 0.0;
+    request.pose_point.orientation.y = 0.0;
+    request.pose_point.orientation.z = 0.0;
+    spot_msgs::HandPose::Response response;
+    if (!hand_pose_client.call(request, response)) {
+        ROS_ERROR_STREAM("Failed to call service. Service validity: " << hand_pose_client.isValid() ? "True" : "False");
+    }
+    ROS_INFO_STREAM("Finished moving to starting pose.");
 }
 
 void SpotArmInterface::request_hand_pose(const geometry_msgs::Pose::ConstPtr& pose) {
