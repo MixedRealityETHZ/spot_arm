@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
     std_msgs
     spot_msgs
 )
+find_package(Eigen3 REQUIRED)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -108,6 +109,8 @@ catkin_package(
 #     LIBRARIES spot_arm_interface
     CATKIN_DEPENDS geometry_msgs roscpp std_msgs spot_msgs
 #     DEPENDS system_lib
+    DEPENDS
+        EIGEN3
 )
 
 ###########
@@ -151,7 +154,13 @@ add_executable(${PROJECT_NAME}
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME}
-  ${catkin_LIBRARIES}
+    ${catkin_LIBRARIES}
+    ${EIGEN3_LIBRARIES}
+)
+
+target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC
+    ${EIGEN3_INCLUDE_DIRS}
+    ${catkin_INCLUDE_DIRS}
 )
 
 #############

@@ -4,6 +4,8 @@
 #include <geometry_msgs/Pose.h>
 #include <ros/ros.h>
 
+#include <Eigen/Geometry>
+
 namespace spot_arm_interface {
 
 class SpotArmInterface {
@@ -16,6 +18,9 @@ private:
     ros::NodeHandle nh;
     ros::Subscriber pose_subscriber;
     ros::ServiceClient hand_pose_client;
+
+    // Initial pose
+    Eigen::Isometry3d initial_pose;
 };
 
 }
