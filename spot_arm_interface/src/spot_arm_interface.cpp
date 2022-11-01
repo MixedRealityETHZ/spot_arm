@@ -11,7 +11,7 @@ SpotArmInterface::SpotArmInterface()
             nh.subscribe<geometry_msgs::PoseStamped>("input_poses", 1, &SpotArmInterface::request_hand_pose, this);
 
     // Create service client
-    const std::string hand_pose_service_name{"gripper_pose"};
+    const std::string hand_pose_service_name{"/spot/gripper_pose"};
     hand_pose_client = nh.serviceClient<spot_msgs::HandPose>(hand_pose_service_name);
     ROS_INFO_STREAM("Waiting for HandPose service \'" << hand_pose_service_name << "\' to come online...");
     if (!hand_pose_client.waitForExistence()) {
