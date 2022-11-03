@@ -1,7 +1,13 @@
 <launch>
-    <arg name="input_poses" default="input_poses"/>
+    <arg name="input_pose_topic" default="/cam_pos_trans"/>
+    <arg name="config_file"      default="$(find spot_arm_interface)/config/default.yaml"/>
+    <arg name="rviz"             default="false"/>
 
     <node pkg="spot_arm_interface" type="spot_arm_interface" name="spot_arm_interface" output="screen">
-        <remap from="~input_poses"    to="$(arg input_poses)"/>
+        <remap from="~input_pose_topic"    to="$(arg input_pose_topic)"/>
+        <rosparam command="load" file="$(arg config_file)"/>
     </node>
+
+    <node if="$(arg rviz)" pkg="rviz" type="rviz" name="spot_arm_interface_rviz" output="screen"
+            args="-d $(find spot_arm_interface)/rviz/tf.rviz"/>
 </launch>
