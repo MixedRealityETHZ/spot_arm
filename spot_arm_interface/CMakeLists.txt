@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
     roscpp
     std_msgs
     spot_msgs
+    tf2_ros
 )
 find_package(Eigen3 REQUIRED)
 
@@ -107,7 +108,7 @@ find_package(Eigen3 REQUIRED)
 catkin_package(
     INCLUDE_DIRS include
 #     LIBRARIES spot_arm_interface
-    CATKIN_DEPENDS geometry_msgs roscpp std_msgs spot_msgs
+    CATKIN_DEPENDS geometry_msgs roscpp std_msgs spot_msgs tf2_ros
 #     DEPENDS system_lib
     DEPENDS
         EIGEN3
