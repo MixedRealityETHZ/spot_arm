@@ -12,4 +12,4 @@ robot_initial_pose:
 robot_body_frame: "base_link"
 hand_request_frame: "hand_request"
 
-disable_service: true
+disable_service: false
