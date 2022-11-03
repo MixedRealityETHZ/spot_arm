@@ -23,9 +23,20 @@ This is a ROS package for controlling the Spot arm from a stream of `geometry_ms
 
 First the `spot_ros` driver must be running on the robot.
 
-Replacing `<pose_topic_name>` with your input pose topic:
+Also launch the tcp endpoint with default args:
 ```bash
-roslaunch spot_arm_interface spot_arm_interface.launch input_poses:=<pose_topic_name>
+roslaunch ros_tcp_endpoint endpoint.launch
+```
+
+To configure your local machine to see Spot as the ROS master. Run `hostname -I` to get your ip address (e.g. `<local_ip_address> = 192.168.1.28`):
+```bash
+export ROS_MASTER_URI=http://192.168.1.243:11311
+export ROS_IP=<local_ip_address>
+```
+
+To launch the arm interface, optionally turning `rviz` on:
+```bash
+roslaunch spot_arm_interface spot_arm_interface.launch rviz:=false
 ```
 
 ## External Software
