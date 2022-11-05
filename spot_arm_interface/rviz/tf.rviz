@@ -3,7 +3,8 @@ Panels:
     Help Height: 0
     Name: Displays
     Property Tree Widget:
-      Expanded: ~
+      Expanded:
+        - /TF1
       Splitter Ratio: 0.5
     Tree Height: 627
   - Class: rviz/Selection
@@ -53,7 +54,91 @@ Visualization Manager:
       Enabled: true
       Frame Timeout: 15
       Frames:
-        All Enabled: true
+        All Enabled: false
+        arm0.link_wr1:
+          Value: false
+        back:
+          Value: false
+        back_fisheye:
+          Value: false
+        base_link:
+          Value: true
+        body:
+          Value: false
+        flat_body:
+          Value: false
+        front_left_foot:
+          Value: false
+        front_left_hip:
+          Value: false
+        front_left_lower_leg:
+          Value: false
+        front_left_upper_leg:
+          Value: false
+        front_rail:
+          Value: false
+        front_right_foot:
+          Value: false
+        front_right_hip:
+          Value: false
+        front_right_lower_leg:
+          Value: false
+        front_right_upper_leg:
+          Value: false
+        frontleft:
+          Value: false
+        frontleft_fisheye:
+          Value: false
+        frontright:
+          Value: false
+        frontright_fisheye:
+          Value: false
+        gpe:
+          Value: false
+        hand:
+          Value: true
+        hand_color_image_sensor:
+          Value: false
+        hand_depth_sensor:
+          Value: false
+        head:
+          Value: false
+        left:
+          Value: false
+        left_fisheye:
+          Value: false
+        link_wr1:
+          Value: false
+        odom:
+          Value: false
+        real_front_rail:
+          Value: false
+        real_rear_rail:
+          Value: false
+        rear_left_foot:
+          Value: false
+        rear_left_hip:
+          Value: false
+        rear_left_lower_leg:
+          Value: false
+        rear_left_upper_leg:
+          Value: false
+        rear_rail:
+          Value: false
+        rear_right_foot:
+          Value: false
+        rear_right_hip:
+          Value: false
+        rear_right_lower_leg:
+          Value: false
+        rear_right_upper_leg:
+          Value: false
+        right:
+          Value: false
+        right_fisheye:
+          Value: false
+        vision:
+          Value: false
       Marker Alpha: 1
       Marker Scale: 1
       Name: TF
@@ -61,7 +146,72 @@ Visualization Manager:
       Show Axes: true
       Show Names: true
       Tree:
-        {}
+        odom:
+          body:
+            arm0.link_wr1:
+              hand_color_image_sensor:
+                {}
+              hand_depth_sensor:
+                {}
+            base_link:
+              {}
+            flat_body:
+              {}
+            front_left_foot:
+              {}
+            front_left_hip:
+              front_left_upper_leg:
+                front_left_lower_leg:
+                  {}
+            front_rail:
+              {}
+            front_right_foot:
+              {}
+            front_right_hip:
+              front_right_upper_leg:
+                front_right_lower_leg:
+                  {}
+            hand:
+              {}
+            head:
+              back:
+                back_fisheye:
+                  {}
+              frontleft:
+                frontleft_fisheye:
+                  {}
+              frontright:
+                frontright_fisheye:
+                  {}
+              left:
+                left_fisheye:
+                  {}
+              right:
+                right_fisheye:
+                  {}
+            link_wr1:
+              {}
+            real_front_rail:
+              real_rear_rail:
+                {}
+            rear_left_foot:
+              {}
+            rear_left_hip:
+              rear_left_upper_leg:
+                rear_left_lower_leg:
+                  {}
+            rear_rail:
+              {}
+            rear_right_foot:
+              {}
+            rear_right_hip:
+              rear_right_upper_leg:
+                rear_right_lower_leg:
+                  {}
+            vision:
+              {}
+          gpe:
+            {}
       Update Interval: 0
       Value: true
   Enabled: true
@@ -92,7 +242,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 10
+      Distance: 3.339519739151001
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -129,4 +279,4 @@ Window Geometry:
     collapsed: true
   Width: 1200
   X: 1340
-  Y: 47
+  Y: 27
