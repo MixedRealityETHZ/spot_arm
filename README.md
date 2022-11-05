@@ -3,7 +3,7 @@ Tele-operation of Spot Robot arm using Hololens 2
 
 ## Prerequisities
 
-* `spot_ros`
+* `spot_ros` at [https://github.com/willat343/spot_ros](https://github.com/willat343/spot_ros).
 
 ## Build
 
@@ -37,6 +37,11 @@ export ROS_IP=<local_ip_address>
 To launch the arm interface, optionally turning `rviz` on:
 ```bash
 roslaunch spot_arm_interface spot_arm_interface.launch rviz:=false
+```
+
+To launch the Unity to ROS pose transformation node:
+```bash
+rosrun unity_transform unity_to_ros_pose.py
 ```
 
 ## External Software
