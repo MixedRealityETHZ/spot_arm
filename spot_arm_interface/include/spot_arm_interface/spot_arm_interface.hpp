@@ -3,9 +3,11 @@
 
 #include <geometry_msgs/Pose.h>
 #include <ros/ros.h>
+#include <std_srvs/Trigger.h>
 #include <tf2_ros/transform_broadcaster.h>
 
 #include <Eigen/Geometry>
+
 
 namespace spot_arm_interface {
 
@@ -20,10 +22,13 @@ private:
 
     void request_hand_pose(const geometry_msgs::Pose& pose);
 
+    bool return_to_origin(std_srvs::Trigger::Request& request, std_srvs::Trigger::Response& response);
+
     //// ROS
     ros::NodeHandle nh;
     ros::Subscriber pose_subscriber;
     ros::ServiceClient hand_pose_client;
+    ros::ServiceServer return_to_origin_server;
     tf2_ros::TransformBroadcaster broadcaster;
 
     //// Configuration

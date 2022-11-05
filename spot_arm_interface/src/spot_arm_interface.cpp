@@ -1,7 +1,8 @@
 #include "spot_arm_interface/spot_arm_interface.hpp"
-#include "spot_arm_interface/conversion.hpp"
 
 #include <spot_msgs/HandPose.h>
+
+#include "spot_arm_interface/conversion.hpp"
 
 namespace spot_arm_interface {
 
@@ -22,6 +23,9 @@ SpotArmInterface::SpotArmInterface()
     // Subscriber to pose messages
     pose_subscriber = nh.subscribe<geometry_msgs::Pose>("input_pose_topic", 1,
             &SpotArmInterface::request_hand_pose_callback, this);
+
+    // Return to origin server
+    return_to_origin_server = nh.advertiseService("return_to_origin", &SpotArmInterface::return_to_origin, this);
 
     // Initial pose
     const auto request_pose = to_ros<geometry_msgs::Pose>(initial_pose);
@@ -84,6 +88,17 @@ void SpotArmInterface::request_hand_pose_callback(const geometry_msgs::Pose::Con
     if (!disable_service) {
         request_hand_pose(request_pose);
     }
+}
+
+bool SpotArmInterface::return_to_origin(std_srvs::Trigger::Request& request, std_srvs::Trigger::Response& response) {
+    const auto request_pose = to_ros<geometry_msgs::Pose>(initial_pose);
+    publish_hand_pose_request_tf(request_pose);
+    if (!disable_service) {
+        request_hand_pose(request_pose);
+    }
+    response.success = true;
+    response.message = "Returned to origin";
+    return true;
 }
 
 }
