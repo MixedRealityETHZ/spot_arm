@@ -18,6 +18,8 @@ SpotArmInterface::SpotArmInterface()
                     nh.param<double>("initial_pose/position/z", 0.0));
     nh.param<std::string>("robot_body_frame", robot_body_frame, "base_link");
     nh.param<std::string>("hand_request_frame", hand_request_frame, "hand_request");
+    nh.param<double>("move_duration_initial", move_duration_initial, 0.5);
+    nh.param<double>("move_duration_tracking", move_duration_tracking, 0.1);
     nh.param<bool>("disable_service", disable_service, false);
 
     // Subscriber to pose messages
@@ -42,7 +44,7 @@ SpotArmInterface::SpotArmInterface()
 
         // Move to initial pose
         ROS_INFO_STREAM("Moving to starting pose.");
-        request_hand_pose(request_pose);
+        request_hand_pose(request_pose, move_duration_initial);
     }
     ROS_INFO_STREAM("Ready to receive pose commands!");
 }
@@ -62,9 +64,10 @@ void SpotArmInterface::publish_hand_pose_request_tf(const geometry_msgs::Pose& p
     broadcaster.sendTransform(transformStamped);
 }
 
-void SpotArmInterface::request_hand_pose(const geometry_msgs::Pose& pose) {
+void SpotArmInterface::request_hand_pose(const geometry_msgs::Pose& pose, const double seconds) {
     spot_msgs::HandPose::Request request;
     request.pose_point = pose;
+    request.seconds = seconds;
     spot_msgs::HandPose::Response response;
     if (!hand_pose_client.call(request, response)) {
         ROS_ERROR_STREAM("Failed to call service. Service validity: " << hand_pose_client.isValid() ? "True" : "False");
@@ -86,7 +89,7 @@ void SpotArmInterface::request_hand_pose_callback(const geometry_msgs::Pose::Con
     // Hand pose request
     publish_hand_pose_request_tf(request_pose);
     if (!disable_service) {
-        request_hand_pose(request_pose);
+        request_hand_pose(request_pose, move_duration_tracking);
     }
 }
 
@@ -94,7 +97,7 @@ bool SpotArmInterface::return_to_origin(std_srvs::Trigger::Request& request, std
     const auto request_pose = to_ros<geometry_msgs::Pose>(initial_pose);
     publish_hand_pose_request_tf(request_pose);
     if (!disable_service) {
-        request_hand_pose(request_pose);
+        request_hand_pose(request_pose, move_duration_initial);
     }
     response.success = true;
     response.message = "Returned to origin";

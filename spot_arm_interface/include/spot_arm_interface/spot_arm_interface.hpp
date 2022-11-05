@@ -20,7 +20,7 @@ private:
 
     void request_hand_pose_callback(const geometry_msgs::Pose::ConstPtr& pose);
 
-    void request_hand_pose(const geometry_msgs::Pose& pose);
+    void request_hand_pose(const geometry_msgs::Pose& pose, const double seconds);
 
     bool return_to_origin(std_srvs::Trigger::Request& request, std_srvs::Trigger::Response& response);
 
@@ -38,6 +38,10 @@ private:
     std::string robot_body_frame;
     // Hand request frame
     std::string hand_request_frame;
+    // Move duration initial
+    double move_duration_initial;
+    // Move duration tracking
+    double move_duration_tracking;
     // Disable service
     bool disable_service;
 };
