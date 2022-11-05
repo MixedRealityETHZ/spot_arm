@@ -3,8 +3,7 @@ Panels:
     Help Height: 0
     Name: Displays
     Property Tree Widget:
-      Expanded:
-        - /TF1
+      Expanded: ~
       Splitter Ratio: 0.5
     Tree Height: 627
   - Class: rviz/Selection
@@ -52,7 +51,7 @@ Visualization Manager:
       Value: true
     - Class: rviz/TF
       Enabled: true
-      Frame Timeout: 15
+      Frame Timeout: 1e+09
       Frames:
         All Enabled: false
         arm0.link_wr1:
@@ -96,13 +95,13 @@ Visualization Manager:
         gpe:
           Value: false
         hand:
-          Value: true
+          Value: false
         hand_color_image_sensor:
           Value: false
         hand_depth_sensor:
           Value: false
         head:
-          Value: false
+          Value: true
         left:
           Value: false
         left_fisheye:
@@ -242,7 +241,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 3.339519739151001
+      Distance: 3.748223066329956
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1

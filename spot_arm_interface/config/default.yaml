@@ -15,4 +15,4 @@ hand_request_frame: "hand_request"
 move_duration_initial: 0.5
 move_duration_tracking: 0.1
 
-disable_service: false
+start_service_enabled: true

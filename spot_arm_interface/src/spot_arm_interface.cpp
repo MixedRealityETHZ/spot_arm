@@ -20,19 +20,24 @@ SpotArmInterface::SpotArmInterface()
     nh.param<std::string>("hand_request_frame", hand_request_frame, "hand_request");
     nh.param<double>("move_duration_initial", move_duration_initial, 0.5);
     nh.param<double>("move_duration_tracking", move_duration_tracking, 0.1);
-    nh.param<bool>("disable_service", disable_service, false);
+    nh.param<bool>("start_service_enabled", service_enabled, true);
 
     // Subscriber to pose messages
     pose_subscriber = nh.subscribe<geometry_msgs::Pose>("input_pose_topic", 1,
             &SpotArmInterface::request_hand_pose_callback, this);
 
     // Return to origin server
-    return_to_origin_server = nh.advertiseService("return_to_origin", &SpotArmInterface::return_to_origin, this);
+    return_to_origin_server =
+            nh.advertiseService("return_to_origin", &SpotArmInterface::return_to_origin_callback, this);
+
+    // Set service active
+    set_service_active_server =
+            nh.advertiseService("set_service_active", &SpotArmInterface::set_service_active_callback, this);
 
     // Initial pose
     const auto request_pose = to_ros<geometry_msgs::Pose>(initial_pose);
     publish_hand_pose_request_tf(request_pose);
-    if (!disable_service) {
+    if (service_enabled) {
         // Create service client
         const std::string hand_pose_service_name{"/spot/gripper_pose"};
         hand_pose_client = nh.serviceClient<spot_msgs::HandPose>(hand_pose_service_name);
@@ -88,19 +93,26 @@ void SpotArmInterface::request_hand_pose_callback(const geometry_msgs::Pose::Con
 
     // Hand pose request
     publish_hand_pose_request_tf(request_pose);
-    if (!disable_service) {
+    if (service_enabled) {
         request_hand_pose(request_pose, move_duration_tracking);
     }
 }
 
-bool SpotArmInterface::return_to_origin(std_srvs::Trigger::Request& request, std_srvs::Trigger::Response& response) {
+bool SpotArmInterface::return_to_origin_callback(std_srvs::Trigger::Request& request, std_srvs::Trigger::Response& response) {
     const auto request_pose = to_ros<geometry_msgs::Pose>(initial_pose);
     publish_hand_pose_request_tf(request_pose);
-    if (!disable_service) {
+    if (service_enabled) {
         request_hand_pose(request_pose, move_duration_initial);
     }
     response.success = true;
     response.message = "Returned to origin";
+    return true;
+}
+
+bool SpotArmInterface::set_service_active_callback(std_srvs::SetBool::Request& request, std_srvs::SetBool::Response& response) {
+    service_enabled = request.data;
+    response.success = true;
+    response.message = (service_enabled ? "Service enabled!" : "Service disabled!");
     return true;
 }
 
