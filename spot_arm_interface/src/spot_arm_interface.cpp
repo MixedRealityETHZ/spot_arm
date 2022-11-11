@@ -37,6 +37,10 @@ SpotArmInterface::SpotArmInterface()
     pose_subscriber = nh.subscribe<geometry_msgs::Pose>("input_pose_topic", 1,
             &SpotArmInterface::request_hand_pose_callback, this);
 
+    // Subscriber to reset command topic
+    reset_subscriber = nh.subscribe<geometry_msgs::Pose>("reset_robot_origin", 1,
+            &SpotArmInterface::request_reset_callback, this);
+
     // Return to origin server
     return_to_origin_server =
             nh.advertiseService("return_to_origin", &SpotArmInterface::return_to_origin_callback, this);
@@ -126,8 +130,8 @@ void SpotArmInterface::request_hand_pose_callback(const geometry_msgs::Pose::Con
             Eigen::Quaterniond(pose->orientation.w, pose->orientation.x, pose->orientation.y, pose->orientation.z)
                     .normalized();
 
-    // Transform relative to arm origin: T_O^N = T_O^I * T_I^N
-    const Eigen::Isometry3d origin_to_new = origin_to_initial * initial_to_new;
+    // Transform relative to arm origin: T_O^N = T_O^I * reset transform * T_I^N
+    const Eigen::Isometry3d origin_to_new = origin_to_initial * this->reset_t * initial_to_new;
 
     // Obtain command arm pose: T_B^N = T_B^O * T_O^N
     Eigen::Isometry3d body_to_new = body_to_origin * origin_to_new;
@@ -160,6 +164,15 @@ void SpotArmInterface::request_hand_pose_callback(const geometry_msgs::Pose::Con
     if (spot_commands_enabled) {
         request_hand_pose(pose_request_msg, move_duration_tracking);
     }
+}
+
+void SpotArmInterface::request_reset_callback(const geometry_msgs::Pose::ConstPtr& pose) {
+    const Eigen::Isometry3d initial_to_new =
+            Eigen::Translation3d(pose->position.x, pose->position.y, pose->position.z) *
+            Eigen::Quaterniond(pose->orientation.w, pose->orientation.x, pose->orientation.y, pose->orientation.z)
+                    .normalized();
+    
+    this->reset_t = initial_to_new.inverse();
 }
 
 bool SpotArmInterface::return_to_origin_callback(std_srvs::Trigger::Request& request,

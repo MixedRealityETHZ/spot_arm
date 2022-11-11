@@ -34,6 +34,9 @@ private:
     
     bool set_spot_commands_active_callback(std_srvs::SetBool::Request& request, std_srvs::SetBool::Response& response);
 
+
+    void request_reset_callback(const geometry_msgs::Pose::ConstPtr& pose);
+
     //// ROS
     ros::NodeHandle nh;
     // Listen to hand pose requests
@@ -72,6 +75,12 @@ private:
     //// State
     // Spot body to origin pose (T_B^O)
     Eigen::Isometry3d body_to_origin;
+
+    //// Reset 
+    // Listen to reset request
+    ros::Subscriber reset_subscriber;
+    // Initial pose (T_O^I)
+    Eigen::Isometry3d reset_t = Eigen::Isometry3d::Identity();
 };
 
 }
