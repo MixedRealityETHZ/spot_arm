@@ -9,15 +9,17 @@ namespace spot_arm_interface {
 
 SpotArmInterface::SpotArmInterface()
     : nh("~"),
-      body_to_origin(Eigen::Isometry3d::Identity()) {
+      body_to_origin(Eigen::Isometry3d::Identity()),
+      spot_body_pose_client("/spot/trajectory", true) {
     // Configuration
-    origin_to_initial =
-            Eigen::Translation3d(nh.param<double>("initial_pose/position/x", 0.7),
-                    nh.param<double>("initial_pose/position/y", 0.0),
-                    nh.param<double>("initial_pose/position/z", 0.5)) *
-            Eigen::Quaterniond(nh.param<double>("initial_pose/orientation/w", 1.0),
-                    nh.param<double>("initial_pose/orientation/x", 0.0), nh.param<double>("initial_pose/orientation/y", 0.0),
-                    nh.param<double>("initial_pose/orientation/z", 0.0)).normalized();
+    origin_to_initial = Eigen::Translation3d(nh.param<double>("initial_pose/position/x", 0.7),
+                                nh.param<double>("initial_pose/position/y", 0.0),
+                                nh.param<double>("initial_pose/position/z", 0.5)) *
+                        Eigen::Quaterniond(nh.param<double>("initial_pose/orientation/w", 1.0),
+                                nh.param<double>("initial_pose/orientation/x", 0.0),
+                                nh.param<double>("initial_pose/orientation/y", 0.0),
+                                nh.param<double>("initial_pose/orientation/z", 0.0))
+                                .normalized();
     nh.param<std::string>("body_frame", body_frame, "base_link");
     nh.param<std::string>("hand_request_frame", hand_request_frame, "hand_request");
     nh.param<std::string>("body_origin_frame", body_origin_frame, "body_origin");
@@ -68,6 +70,13 @@ SpotArmInterface::SpotArmInterface()
         // Move to initial pose
         ROS_INFO_STREAM("Moving to starting pose.");
         request_hand_pose(request_pose, move_duration_initial);
+
+        // Wait for spot body movement service
+        if (move_spot_body_enabled) {
+            ROS_INFO_STREAM("Waiting for Spot trajectory server.");
+            spot_body_pose_client.waitForServer();
+            ROS_INFO_STREAM("Acquired Spot trajectory server");
+        }
     }
     ROS_INFO_STREAM("Ready to receive pose commands!");
 }
@@ -77,7 +86,20 @@ void SpotArmInterface::command_spot_to_pose(const ros::Time& stamp) {
     spot_body_pose.header.stamp = stamp;
     spot_body_pose.header.frame_id = body_origin_frame;
     spot_body_pose.pose = to_ros<geometry_msgs::Pose>(body_to_origin.inverse());
-    spot_body_pose_publisher.publish(spot_body_pose);
+    // spot_body_pose_publisher.publish(spot_body_pose);
+    spot_msgs::TrajectoryGoal spot_body_pose_goal;
+    spot_body_pose_goal.target_pose = spot_body_pose;
+    spot_body_pose_goal.duration.data = ros::Duration(5);
+    spot_body_pose_goal.precise_positioning = true;
+    spot_body_pose_client.sendGoal(spot_body_pose_goal, std::bind(&SpotArmInterface::spot_trajectory_done, this,
+            std::placeholders::_1, std::placeholders::_2));
+    // const bool finished_before_timeout = spot_body_pose_client.waitForResult(spot_body_pose_goal.duration.data);
+    // if (finished_before_timeout) {
+    //     actionlib::SimpleClientGoalState state = spot_body_pose_client.getState();
+    //     ROS_INFO_STREAM("Action finished: " << state.toString());
+    // } else {
+    //     ROS_WARN_STREAM("Action timed out");
+    // }
 }
 
 void SpotArmInterface::publish_hand_pose_request_tf(const geometry_msgs::Pose& pose, const ros::Time& stamp) {
@@ -192,6 +214,11 @@ bool SpotArmInterface::set_spot_commands_active_callback(std_srvs::SetBool::Requ
     response.success = true;
     response.message = (spot_commands_enabled ? "Service enabled!" : "Service disabled!");
     return true;
+}
+
+void SpotArmInterface::spot_trajectory_done(const actionlib::SimpleClientGoalState& state,
+        const spot_msgs::TrajectoryResultConstPtr& result) {
+    ROS_INFO_STREAM("Trajectory action finished: " << state.toString());
 }
 
 }
