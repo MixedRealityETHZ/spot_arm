@@ -1,18 +1,28 @@
-robot_initial_pose:
-  position:
+initial_pose:
+  position: &initial_position
     x: 0.7
-    y: 0.5
-    z: 0.0
+    y: 0.0
+    z: 0.5
   orientation:
     w: 1.0
     x: 0.0
     y: 0.0
     z: 0.0
 
-robot_body_frame: "base_link"
+body_frame: "base_link"
 hand_request_frame: "hand_request"
+body_origin_frame: "body_origin"
 
 move_duration_initial: 0.5
 move_duration_tracking: 0.1
 
-start_service_enabled: true
+move_spot_body_enabled: true
+
+hand_bbox:
+  center: *initial_position
+  size:
+    x: 0.5
+    y: 0.5
+    z: 0.5
+
+spot_commands_enabled: false

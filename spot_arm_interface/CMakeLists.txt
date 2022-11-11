@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0.2)
 project(spot_arm_interface)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-# add_compile_options(-std=c++11)
+add_compile_options(-std=c++17)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -139,6 +139,7 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(${PROJECT_NAME}
+    src/bounding_box.cpp
     src/conversion.cpp
     src/spot_arm_interface.cpp
     src/spot_arm_interface_main.cpp

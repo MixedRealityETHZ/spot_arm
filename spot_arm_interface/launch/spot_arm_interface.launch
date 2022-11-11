@@ -2,6 +2,9 @@
     <arg name="input_pose_topic" default="/cam_pos_trans"/>
     <arg name="config_file"      default="$(find spot_arm_interface)/config/default.yaml"/>
     <arg name="rviz"             default="false"/>
+    <arg name="use_sim_time"     default="false"/>
+
+    <rosparam if="$(arg use_sim_time)" param="use_sim_time" subst_value="true">$(arg use_sim_time)</rosparam>
 
     <node if="$(arg rviz)" pkg="rviz" type="rviz" name="spot_arm_interface_rviz" output="screen"
             args="-d $(find spot_arm_interface)/rviz/tf.rviz"/>
