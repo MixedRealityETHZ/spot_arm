@@ -75,6 +75,8 @@ private:
     //// State
     // Spot body to origin pose (T_B^O)
     Eigen::Isometry3d body_to_origin;
+    // Move duration
+    bool move_to_reset;
 
     //// Reset 
     // Listen to reset request

@@ -25,4 +25,4 @@ hand_bbox:
     y: 0.5
     z: 0.5
 
-spot_commands_enabled: false
+spot_commands_enabled: true
