@@ -52,7 +52,9 @@ SpotArmInterface::SpotArmInterface()
 
     // Send body pose tf
     const ros::Time stamp = ros::Time::now();
-    publish_body_origin_tf(stamp);
+    // publish_body_origin_tf(stamp);
+
+    // TODO: look up body_to_origin
 
     // Send arm to iniital pose T_B^I = T_B^O * T_O^I
     const auto request_pose = to_ros<geometry_msgs::Pose>(body_to_origin * origin_to_initial);
@@ -87,12 +89,17 @@ void SpotArmInterface::command_spot_to_pose(const ros::Time& stamp) {
     spot_body_pose.header.frame_id = body_origin_frame;
     spot_body_pose.pose = to_ros<geometry_msgs::Pose>(body_to_origin.inverse());
     // spot_body_pose_publisher.publish(spot_body_pose);
+    ROS_INFO_STREAM("Sending spot to position, orientation (wxyz): ["
+                    << spot_body_pose.pose.position.x << ", " << spot_body_pose.pose.position.y << ", "
+                    << spot_body_pose.pose.position.z << "], [" << spot_body_pose.pose.orientation.w << ", "
+                    << spot_body_pose.pose.orientation.x << ", " << spot_body_pose.pose.orientation.y << ", "
+                    << spot_body_pose.pose.orientation.z << "]");
     spot_msgs::TrajectoryGoal spot_body_pose_goal;
     spot_body_pose_goal.target_pose = spot_body_pose;
     spot_body_pose_goal.duration.data = ros::Duration(5);
     spot_body_pose_goal.precise_positioning = true;
-    spot_body_pose_client.sendGoal(spot_body_pose_goal, std::bind(&SpotArmInterface::spot_trajectory_done, this,
-            std::placeholders::_1, std::placeholders::_2));
+    spot_body_pose_client.sendGoal(spot_body_pose_goal,
+            std::bind(&SpotArmInterface::spot_trajectory_done, this, std::placeholders::_1, std::placeholders::_2));
     // const bool finished_before_timeout = spot_body_pose_client.waitForResult(spot_body_pose_goal.duration.data);
     // if (finished_before_timeout) {
     //     actionlib::SimpleClientGoalState state = spot_body_pose_client.getState();
@@ -116,14 +123,14 @@ void SpotArmInterface::publish_hand_pose_request_tf(const geometry_msgs::Pose& p
     publish_hand_pose_request_tf(pose, ros::Time::now());
 }
 
-void SpotArmInterface::publish_body_origin_tf(const ros::Time& stamp) {
-    geometry_msgs::TransformStamped transform_stamped;
-    transform_stamped.header.stamp = stamp;
-    transform_stamped.header.frame_id = body_frame;
-    transform_stamped.child_frame_id = body_origin_frame;
-    transform_stamped.transform = to_ros<geometry_msgs::Transform>(body_to_origin);
-    broadcaster.sendTransform(transform_stamped);
-}
+// void SpotArmInterface::publish_body_origin_tf(const ros::Time& stamp) {
+//     geometry_msgs::TransformStamped transform_stamped;
+//     transform_stamped.header.stamp = stamp;
+//     transform_stamped.header.frame_id = body_frame;
+//     transform_stamped.child_frame_id = body_origin_frame;
+//     transform_stamped.transform = to_ros<geometry_msgs::Transform>(body_to_origin);
+//     broadcaster.sendTransform(transform_stamped);
+// }
 
 void SpotArmInterface::request_hand_pose(const geometry_msgs::Pose& pose, const double seconds) {
     spot_msgs::HandPose::Request request;
@@ -165,7 +172,7 @@ void SpotArmInterface::request_hand_pose_callback(const geometry_msgs::Pose::Con
             body_to_origin = body_to_new * origin_to_new.inverse();
 
             // Publish TF (T_B^O)
-            publish_body_origin_tf(stamp);
+            // publish_body_origin_tf(stamp);
 
             // Send command to Spot (T_O^B) if services are enabled
             if (spot_commands_enabled) {
@@ -191,7 +198,7 @@ bool SpotArmInterface::return_to_origin_callback(std_srvs::Trigger::Request& req
 
     // Command spot back to pose
     if (move_spot_body_enabled) {
-        publish_body_origin_tf(stamp);
+        // publish_body_origin_tf(stamp);
         if (spot_commands_enabled) {
             command_spot_to_pose(stamp);
         }

@@ -27,7 +27,7 @@ private:
 
     void publish_hand_pose_request_tf(const geometry_msgs::Pose& pose);
 
-    void publish_body_origin_tf(const ros::Time& stamp);
+    // void publish_body_origin_tf(const ros::Time& stamp);
 
     void request_hand_pose_callback(const geometry_msgs::Pose::ConstPtr& pose);
 
