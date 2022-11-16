@@ -131,7 +131,7 @@ void SpotArmInterface::request_hand_pose_callback(const geometry_msgs::Pose::Con
                     .normalized();
 
     // Transform relative to arm origin: T_O^N = T_O^I * reset transform * T_I^N
-    const Eigen::Isometry3d origin_to_new = origin_to_initial * this->reset_t * initial_to_new;
+    const Eigen::Isometry3d origin_to_new = origin_to_initial * this->initial_to_reset * initial_to_new;
 
     // Obtain command arm pose: T_B^N = T_B^O * T_O^N
     Eigen::Isometry3d body_to_new = body_to_origin * origin_to_new;
@@ -175,7 +175,7 @@ void SpotArmInterface::request_reset_callback(const geometry_msgs::Pose::ConstPt
             Eigen::Quaterniond(pose->orientation.w, pose->orientation.x, pose->orientation.y, pose->orientation.z)
                     .normalized();
     
-    this->reset_t = initial_to_new.inverse();
+    this->initial_to_reset = initial_to_new.inverse();
 
     // Transform relative to arm origin: T_O^N = T_O^I * reset transform * T_I^N
     const Eigen::Isometry3d origin_to_new = origin_to_initial;

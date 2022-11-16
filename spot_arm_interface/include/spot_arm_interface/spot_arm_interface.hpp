@@ -79,8 +79,8 @@ private:
     //// Reset 
     // Listen to reset request
     ros::Subscriber reset_subscriber;
-    // Initial pose (T_O^I)
-    Eigen::Isometry3d reset_t = Eigen::Isometry3d::Identity();
+    // Initial pose (T_I^R)
+    Eigen::Isometry3d initial_to_reset = Eigen::Isometry3d::Identity();
 };
 
 }
