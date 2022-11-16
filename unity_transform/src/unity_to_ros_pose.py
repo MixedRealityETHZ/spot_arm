@@ -6,11 +6,9 @@ from geometry_msgs.msg import Pose
 class UnityTransform:
     def __init__(self):
         rospy.init_node('unity_transform')
-        input_pose_topic = '/cam_pos'
-        rospy.Subscriber(input_pose_topic, Pose, self.transform)
-        output_pose_topic = '/cam_pos_trans'
-        self.out = rospy.Publisher(output_pose_topic, Pose, queue_size=10)
-        rospy.loginfo("Converting Unity poses on " + input_pose_topic + " to ROS poses on " + output_pose_topic)
+        rospy.Subscriber('input_pose', Pose, self.transform)
+        self.out = rospy.Publisher('output_pose', Pose, queue_size=10)
+        rospy.loginfo("Converting Unity poses to ROS poses")
 
     def transform(self, msg):
         output_msg = Pose()
