@@ -167,12 +167,54 @@ void SpotArmInterface::request_hand_pose_callback(const geometry_msgs::Pose::Con
 }
 
 void SpotArmInterface::request_reset_callback(const geometry_msgs::Pose::ConstPtr& pose) {
+    // Timestamp
+    const ros::Time stamp = ros::Time::now();
+
     const Eigen::Isometry3d initial_to_new =
             Eigen::Translation3d(pose->position.x, pose->position.y, pose->position.z) *
             Eigen::Quaterniond(pose->orientation.w, pose->orientation.x, pose->orientation.y, pose->orientation.z)
                     .normalized();
     
     this->reset_t = initial_to_new.inverse();
+
+    // Transform relative to arm origin: T_O^N = T_O^I * reset transform * T_I^N
+    const Eigen::Isometry3d origin_to_new = origin_to_initial;
+
+    // Obtain command arm pose: T_B^N = T_B^O * T_O^N
+    Eigen::Isometry3d body_to_new = body_to_origin * origin_to_new;
+
+    // Check if invalid
+    if (!hand_bbox.contains(body_to_new.translation())) {
+        // Replace translation with closest valid one
+        body_to_new.translation() = hand_bbox.closest_valid(body_to_new.translation());
+
+        // Change the transformation from body to origin (T_B^O)
+        if (move_spot_body_enabled) {
+            // T_B^O = T_B^N * T_N^O
+            body_to_origin = body_to_new * origin_to_new.inverse();
+
+            // Publish TF (T_B^O)
+            publish_body_origin_tf(stamp);
+
+            // Send command to Spot (T_O^B) if services are enabled
+            if (spot_commands_enabled) {
+                command_spot_to_pose(stamp);
+            }
+        }
+    }
+
+    // Convert to ROS
+    const geometry_msgs::Pose pose_request_msg = to_ros<geometry_msgs::Pose>(body_to_new);
+
+    // Hand pose request
+    publish_hand_pose_request_tf(pose_request_msg, stamp);
+    if (spot_commands_enabled) {
+        request_hand_pose(pose_request_msg, move_duration_initial);
+    }
+
+
+
+
 }
 
 bool SpotArmInterface::return_to_origin_callback(std_srvs::Trigger::Request& request,
