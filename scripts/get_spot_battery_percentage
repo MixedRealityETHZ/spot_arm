@@ -1,0 +1,2 @@
+#!/bin/bash
+rostopic echo -n 1 /spot/status/battery_states/battery_states[0]/charge_percentage

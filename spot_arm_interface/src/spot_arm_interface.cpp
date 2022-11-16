@@ -10,7 +10,9 @@ namespace spot_arm_interface {
 SpotArmInterface::SpotArmInterface()
     : nh("~"),
       body_to_origin(Eigen::Isometry3d::Identity()),
-      spot_body_pose_client("/spot/trajectory", true) {
+      spot_body_pose_client("/spot/trajectory", true),
+      tf_listener(tf_buffer),
+      move_to_reset(false) {
     // Configuration
     origin_to_initial = Eigen::Translation3d(nh.param<double>("initial_pose/position/x", 0.7),
                                 nh.param<double>("initial_pose/position/y", 0.0),
@@ -22,6 +24,7 @@ SpotArmInterface::SpotArmInterface()
                                 .normalized();
     nh.param<std::string>("body_frame", body_frame, "base_link");
     nh.param<std::string>("hand_request_frame", hand_request_frame, "hand_request");
+    nh.param<std::string>("odom_frame", odom_frame, "odom");
     nh.param<std::string>("body_origin_frame", body_origin_frame, "body_origin");
     nh.param<double>("move_duration_initial", move_duration_initial, 0.5);
     nh.param<double>("move_duration_tracking", move_duration_tracking, 0.1);
@@ -39,6 +42,10 @@ SpotArmInterface::SpotArmInterface()
     pose_subscriber = nh.subscribe<geometry_msgs::Pose>("input_pose_topic", 1,
             &SpotArmInterface::request_hand_pose_callback, this);
 
+    // Subscriber to reset command topic
+    reset_subscriber =
+            nh.subscribe<geometry_msgs::Pose>("input_reset_topic", 1, &SpotArmInterface::request_reset_callback, this);
+
     // Return to origin server
     return_to_origin_server =
             nh.advertiseService("return_to_origin", &SpotArmInterface::return_to_origin_callback, this);
@@ -52,9 +59,7 @@ SpotArmInterface::SpotArmInterface()
 
     // Send body pose tf
     const ros::Time stamp = ros::Time::now();
-    // publish_body_origin_tf(stamp);
-
-    // TODO: look up body_to_origin
+    publish_body_origin_tf(stamp);
 
     // Send arm to iniital pose T_B^I = T_B^O * T_O^I
     const auto request_pose = to_ros<geometry_msgs::Pose>(body_to_origin * origin_to_initial);
@@ -123,14 +128,21 @@ void SpotArmInterface::publish_hand_pose_request_tf(const geometry_msgs::Pose& p
     publish_hand_pose_request_tf(pose, ros::Time::now());
 }
 
-// void SpotArmInterface::publish_body_origin_tf(const ros::Time& stamp) {
-//     geometry_msgs::TransformStamped transform_stamped;
-//     transform_stamped.header.stamp = stamp;
-//     transform_stamped.header.frame_id = body_frame;
-//     transform_stamped.child_frame_id = body_origin_frame;
-//     transform_stamped.transform = to_ros<geometry_msgs::Transform>(body_to_origin);
-//     broadcaster.sendTransform(transform_stamped);
-// }
+void SpotArmInterface::publish_body_origin_tf(const ros::Time& stamp) {
+    // geometry_msgs::TransformStamped transform_stamped;
+    // transform_stamped.header.stamp = stamp;
+    // transform_stamped.header.frame_id = body_frame;
+    // transform_stamped.child_frame_id = body_origin_frame;
+    // transform_stamped.transform = to_ros<geometry_msgs::Transform>(body_to_origin);
+    // broadcaster.sendTransform(transform_stamped);
+
+    geometry_msgs::TransformStamped transform_stamped =
+            tf_buffer.lookupTransform(body_frame, odom_frame, ros::Time(0), ros::Duration(1));
+    transform_stamped.header.stamp = stamp;
+    transform_stamped.header.frame_id = odom_frame;
+    transform_stamped.child_frame_id = body_origin_frame;
+    static_broadcaster.sendTransform(transform_stamped);
+}
 
 void SpotArmInterface::request_hand_pose(const geometry_msgs::Pose& pose, const double seconds) {
     spot_msgs::HandPose::Request request;
@@ -155,8 +167,8 @@ void SpotArmInterface::request_hand_pose_callback(const geometry_msgs::Pose::Con
             Eigen::Quaterniond(pose->orientation.w, pose->orientation.x, pose->orientation.y, pose->orientation.z)
                     .normalized();
 
-    // Transform relative to arm origin: T_O^N = T_O^I * T_I^N
-    const Eigen::Isometry3d origin_to_new = origin_to_initial * initial_to_new;
+    // Transform relative to arm origin: T_O^N = T_O^I * T_I^R * T_I^N
+    const Eigen::Isometry3d origin_to_new = origin_to_initial * initial_to_reset * initial_to_new;
 
     // Obtain command arm pose: T_B^N = T_B^O * T_O^N
     Eigen::Isometry3d body_to_new = body_to_origin * origin_to_new;
@@ -171,9 +183,6 @@ void SpotArmInterface::request_hand_pose_callback(const geometry_msgs::Pose::Con
             // T_B^O = T_B^N * T_N^O
             body_to_origin = body_to_new * origin_to_new.inverse();
 
-            // Publish TF (T_B^O)
-            // publish_body_origin_tf(stamp);
-
             // Send command to Spot (T_O^B) if services are enabled
             if (spot_commands_enabled) {
                 command_spot_to_pose(stamp);
@@ -187,8 +196,18 @@ void SpotArmInterface::request_hand_pose_callback(const geometry_msgs::Pose::Con
     // Hand pose request
     publish_hand_pose_request_tf(pose_request_msg, stamp);
     if (spot_commands_enabled) {
-        request_hand_pose(pose_request_msg, move_duration_tracking);
+        request_hand_pose(pose_request_msg, move_to_reset ? move_duration_initial : move_duration_tracking);
     }
+    move_to_reset = false;
+}
+
+void SpotArmInterface::request_reset_callback(const geometry_msgs::Pose::ConstPtr& pose) {
+    const Eigen::Isometry3d initial_to_new =
+            Eigen::Translation3d(pose->position.x, pose->position.y, pose->position.z) *
+            Eigen::Quaterniond(pose->orientation.w, pose->orientation.x, pose->orientation.y, pose->orientation.z)
+                    .normalized();
+    initial_to_reset = initial_to_new.inverse();
+    move_to_reset = true;
 }
 
 bool SpotArmInterface::return_to_origin_callback(std_srvs::Trigger::Request& request,
@@ -198,7 +217,6 @@ bool SpotArmInterface::return_to_origin_callback(std_srvs::Trigger::Request& req
 
     // Command spot back to pose
     if (move_spot_body_enabled) {
-        // publish_body_origin_tf(stamp);
         if (spot_commands_enabled) {
             command_spot_to_pose(stamp);
         }

@@ -1,5 +1,6 @@
 <launch>
     <arg name="input_pose_topic" default="/cam_pos_trans"/>
+    <arg name="input_reset_topic" default="/reset_position_trans"/>
     <arg name="config_file"      default="$(find spot_arm_interface)/config/default.yaml"/>
     <arg name="rviz"             default="false"/>
     <arg name="use_sim_time"     default="false"/>
@@ -11,6 +12,17 @@
 
     <node pkg="spot_arm_interface" type="spot_arm_interface" name="spot_arm_interface" output="screen">
         <remap from="~input_pose_topic"    to="$(arg input_pose_topic)"/>
+        <remap from="~input_reset_topic"   to="$(arg input_reset_topic)"/>
         <rosparam command="load" file="$(arg config_file)"/>
     </node>
+
+    <include file="$(find unity_transform)/launch/unity_to_ros_pose.launch">
+        <arg name="input_topic"  value="/cam_pos"/>
+        <arg name="output_topic" value="$(arg input_pose_topic)"/>
+    </include>
+
+    <include file="$(find unity_transform)/launch/unity_to_ros_pose.launch">
+        <arg name="input_topic"  value="/reset_position"/>
+        <arg name="output_topic" value="$(arg input_reset_topic)"/>
+    </include>
 </launch>

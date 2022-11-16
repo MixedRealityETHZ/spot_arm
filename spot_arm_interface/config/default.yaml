@@ -11,7 +11,8 @@ initial_pose:
 
 body_frame: "base_link"
 hand_request_frame: "hand_request"
-body_origin_frame: "odom"
+odom_frame: "odom"
+body_origin_frame: "body_origin"
 
 move_duration_initial: 0.5
 move_duration_tracking: 0.1

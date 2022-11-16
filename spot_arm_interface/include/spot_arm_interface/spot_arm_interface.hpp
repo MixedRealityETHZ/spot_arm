@@ -4,13 +4,14 @@
 #include <actionlib/client/simple_action_client.h>
 #include <geometry_msgs/Pose.h>
 #include <ros/ros.h>
+#include <spot_msgs/TrajectoryAction.h>
 #include <std_srvs/SetBool.h>
 #include <std_srvs/Trigger.h>
+#include <tf2_ros/static_transform_broadcaster.h>
 #include <tf2_ros/transform_broadcaster.h>
+#include <tf2_ros/transform_listener.h>
 
 #include <Eigen/Geometry>
-
-#include <spot_msgs/TrajectoryAction.h>
 
 #include "spot_arm_interface/bounding_box.hpp"
 
@@ -27,7 +28,7 @@ private:
 
     void publish_hand_pose_request_tf(const geometry_msgs::Pose& pose);
 
-    // void publish_body_origin_tf(const ros::Time& stamp);
+    void publish_body_origin_tf(const ros::Time& stamp);
 
     void request_hand_pose_callback(const geometry_msgs::Pose::ConstPtr& pose);
 
@@ -39,6 +40,8 @@ private:
 
     void spot_trajectory_done(const actionlib::SimpleClientGoalState& state,
             const spot_msgs::TrajectoryResultConstPtr& result);
+
+    void request_reset_callback(const geometry_msgs::Pose::ConstPtr& pose);
 
     //// ROS
     ros::NodeHandle nh;
@@ -56,6 +59,11 @@ private:
     actionlib::SimpleActionClient<spot_msgs::TrajectoryAction> spot_body_pose_client;
     // TF broadcaster
     tf2_ros::TransformBroadcaster broadcaster;
+    // Static TF broadcaster
+    tf2_ros::StaticTransformBroadcaster static_broadcaster;
+    // TF Listener
+    tf2_ros::Buffer tf_buffer;
+    tf2_ros::TransformListener tf_listener;
 
     //// Configuration
     // Initial pose (T_O^I)
@@ -64,6 +72,8 @@ private:
     std::string body_frame;
     // Hand request frame
     std::string hand_request_frame;
+    // Odom frame
+    std::string odom_frame;
     // Origin frame
     std::string body_origin_frame;
     // Move duration initial
@@ -80,6 +90,14 @@ private:
     //// State
     // Spot body to origin pose (T_B^O)
     Eigen::Isometry3d body_to_origin;
+    // Move duration
+    bool move_to_reset;
+
+    //// Reset
+    // Listen to reset request
+    ros::Subscriber reset_subscriber;
+    // Initial pose (T_I^R)
+    Eigen::Isometry3d initial_to_reset = Eigen::Isometry3d::Identity();
 };
 
 }

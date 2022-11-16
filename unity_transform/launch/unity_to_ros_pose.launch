@@ -1,0 +1,9 @@
+<launch>
+    <arg name="input_topic"  default="input_pose"/>
+    <arg name="output_topic" default="output_pose"/>
+
+    <node pkg="unity_transform" type="unity_to_ros_pose.py" name="$(anon unity_to_ros_pose)" output="screen">
+        <remap from="input_pose"     to="$(arg input_topic)"/>
+        <remap from="output_pose"    to="$(arg output_topic)"/>
+    </node>
+</launch>
