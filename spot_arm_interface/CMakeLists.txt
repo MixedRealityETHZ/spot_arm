@@ -145,6 +145,11 @@ add_executable(${PROJECT_NAME}
     src/spot_arm_interface_main.cpp
 )
 
+add_executable(spot_move_client
+    src/spot_move_client.cpp
+    src/spot_move_client_main.cpp
+)
+
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
@@ -161,8 +166,16 @@ target_link_libraries(${PROJECT_NAME}
     ${EIGEN3_LIBRARIES}
 )
 
+target_link_libraries(spot_move_client
+    ${catkin_LIBRARIES}
+)
+
 target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC
     ${EIGEN3_INCLUDE_DIRS}
+    ${catkin_INCLUDE_DIRS}
+)
+
+target_include_directories(spot_move_client SYSTEM PUBLIC
     ${catkin_INCLUDE_DIRS}
 )
 
