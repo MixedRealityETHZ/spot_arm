@@ -21,7 +21,11 @@ This is a ROS package for controlling the Spot arm from a stream of `geometry_ms
 
 ### Usage
 
-First the `spot_ros` driver must be running on the robot.
+First the `spot_ros` driver must be running on the robot, replacing PASSWORD with the spot password.
+
+```bash
+roslaunch spot_driver driver.launch hostname:=192.168.50.3 username:=admin password:=PASSWORD max_linear_velocity_x:=1.0 max_linear_velocity_y:=1.0 max_angular_velocity_z:=1.0
+```
 
 Also launch the tcp endpoint with default args:
 ```bash
