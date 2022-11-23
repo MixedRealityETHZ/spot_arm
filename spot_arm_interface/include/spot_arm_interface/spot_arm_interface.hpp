@@ -41,6 +41,10 @@ private:
     void spot_trajectory_done(const actionlib::SimpleClientGoalState& state,
             const spot_msgs::TrajectoryResultConstPtr& result);
 
+    void spot_trajectory_active();
+
+    void spot_trajectory_feedback(const spot_msgs::TrajectoryFeedbackConstPtr& feedback);
+
     void request_reset_callback(const geometry_msgs::Pose::ConstPtr& pose);
 
     //// ROS

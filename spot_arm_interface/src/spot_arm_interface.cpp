@@ -137,7 +137,7 @@ void SpotArmInterface::publish_body_origin_tf(const ros::Time& stamp) {
     // broadcaster.sendTransform(transform_stamped);
 
     geometry_msgs::TransformStamped transform_stamped =
-            tf_buffer.lookupTransform(body_frame, odom_frame, ros::Time(0), ros::Duration(1));
+            tf_buffer.lookupTransform(odom_frame, body_frame, ros::Time(0), ros::Duration(1));
     transform_stamped.header.stamp = stamp;
     transform_stamped.header.frame_id = odom_frame;
     transform_stamped.child_frame_id = body_origin_frame;
@@ -243,7 +243,17 @@ bool SpotArmInterface::set_spot_commands_active_callback(std_srvs::SetBool::Requ
 
 void SpotArmInterface::spot_trajectory_done(const actionlib::SimpleClientGoalState& state,
         const spot_msgs::TrajectoryResultConstPtr& result) {
-    ROS_INFO_STREAM("Trajectory action finished: " << state.toString());
+    ROS_INFO_STREAM("Trajectory action finished ("
+                    << state.toString() << ") with result: [success = " << (result->success ? "TRUE" : "FALSE")
+                    << ", \"" << result->message << "\"]");
+}
+
+void SpotArmInterface::spot_trajectory_active() {
+    ROS_INFO_STREAM("Trajectory active.");
+}
+
+void SpotArmInterface::spot_trajectory_feedback(const spot_msgs::TrajectoryFeedbackConstPtr& feedback) {
+    ROS_INFO_STREAM("Trajectory feedback: \"" << feedback->feedback << "\"");
 }
 
 }
