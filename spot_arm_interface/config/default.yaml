@@ -22,8 +22,8 @@ move_spot_body_enabled: true
 hand_bbox:
   center: *initial_position
   size:
-    x: 0.5
-    y: 0.5
-    z: 0.5
+    x: 0.4
+    y: 0.4
+    z: 0.4
 
 spot_commands_enabled: true
