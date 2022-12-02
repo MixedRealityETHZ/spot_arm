@@ -25,4 +25,6 @@
         <arg name="input_topic"  value="/reset_position"/>
         <arg name="output_topic" value="$(arg input_reset_topic)"/>
     </include>
+
+    <include file="$(find spot_arm_interface)/launch/spot_arm_camera_republish.launch"/>
 </launch>

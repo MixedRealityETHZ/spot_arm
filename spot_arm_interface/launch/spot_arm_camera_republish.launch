@@ -1,0 +1,4 @@
+<launch>
+    <node pkg="image_transport" type="republish" name="republish_spot_arm_camera" output="screen"
+            args="raw in:=/spot/camera/hand_color/image out:=/spot/camera/hand_color_repub/image"/>
+</launch>
