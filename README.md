@@ -48,6 +48,15 @@ To launch the Unity to ROS pose transformation node:
 rosrun unity_transform unity_to_ros_pose.py
 ```
 
+### Troubleshooting
+
+#### Spot body doesn't move
+
+* Make sure you are launching with the max linear and max angular velocity variables set to non-zero values, such as 1.0.
+* Check that `move_spot_body_enabled` is set to `true` in `default.yaml`
+* Try `rosrun spot_move_interface spot_move_client` and publish a pose to `/spot_move_client/pose`.
+* If any of the cameras are not working (error messages in driver terminal), then this may stop spot movement
+
 ## External Software
 
 ### Spot-Arm

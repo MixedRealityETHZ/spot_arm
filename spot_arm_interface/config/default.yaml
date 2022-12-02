@@ -18,9 +18,11 @@ move_duration_initial: 0.5
 move_duration_tracking: 0.1
 
 move_spot_body_enabled: true
+body_pose_method: "ACTION" # options: TOPIC, ACTION
+
+reset_on_start: false
 
 hand_bbox:
-  center: *initial_position
   size:
     x: 0.4
     y: 0.4

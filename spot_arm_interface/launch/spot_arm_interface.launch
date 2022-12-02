@@ -1,4 +1,6 @@
 <launch>
+    <env name="ROSCONSOLE_FORMAT" value="[${node}] [${function}:${line}]: ${message}"/>
+
     <arg name="input_pose_topic" default="/cam_pos_trans"/>
     <arg name="input_reset_topic" default="/reset_position_trans"/>
     <arg name="config_file"      default="$(find spot_arm_interface)/config/default.yaml"/>

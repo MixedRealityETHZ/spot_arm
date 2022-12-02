@@ -12,6 +12,7 @@
 #include <tf2_ros/transform_listener.h>
 
 #include <Eigen/Geometry>
+#include <thread>
 
 #include "spot_arm_interface/bounding_box.hpp"
 
@@ -29,6 +30,8 @@ private:
     void publish_hand_pose_request_tf(const geometry_msgs::Pose& pose);
 
     void publish_body_origin_tf(const ros::Time& stamp);
+
+    void report_loop();
 
     void request_hand_pose_callback(const geometry_msgs::Pose::ConstPtr& pose);
 
@@ -69,9 +72,16 @@ private:
     tf2_ros::Buffer tf_buffer;
     tf2_ros::TransformListener tf_listener;
 
+    //// Reporting
+    std::mutex report_mutex;
+    std::thread report_loop_thread;
+    int arm_command_success_count;
+    int arm_command_failure_count;
+    int body_command_count;
+
     //// Configuration
-    // Initial pose (T_O^I)
-    Eigen::Isometry3d origin_to_initial;
+    // Initial pose (T_B^I)
+    Eigen::Isometry3d body_to_initial;
     // Robot body frame
     std::string body_frame;
     // Hand request frame
@@ -90,6 +100,10 @@ private:
     BoundingBox3D hand_bbox;
     // Enable/disable spot commands
     bool spot_commands_enabled;
+    // Reset flag (for reset on start)
+    bool reset_on_next_pose;
+    // Use body pose action interface
+    bool action_interface;
 
     //// State
     // Spot body to origin pose (T_B^O)
@@ -101,7 +115,7 @@ private:
     // Listen to reset request
     ros::Subscriber reset_subscriber;
     // Initial pose (T_I^R)
-    Eigen::Isometry3d initial_to_reset = Eigen::Isometry3d::Identity();
+    Eigen::Isometry3d initial_to_reset;
 };
 
 }
