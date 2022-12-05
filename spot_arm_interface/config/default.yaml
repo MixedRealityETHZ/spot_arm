@@ -20,7 +20,7 @@ move_duration_tracking: 0.1
 spot_motion_mode: "STATIC" # options: STATIC, TRANSLATION, ROTATION
 body_pose_method: "ACTION" # options: TOPIC, ACTION
 
-reset_on_start: false
+reset_on_start: true
 
 hand_bbox:
   size:
