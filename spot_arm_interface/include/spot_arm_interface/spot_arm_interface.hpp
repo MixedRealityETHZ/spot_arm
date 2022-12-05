@@ -18,6 +18,19 @@
 
 namespace spot_arm_interface {
 
+enum SpotMotionMode {
+    STATIC,
+    TRANSLATION,
+    ROTATION
+};
+
+SpotMotionMode to_spot_motion_mode(const std::string& spot_motion_mode);
+
+struct AngleLimits {
+    double rz_min{0.0};
+    double rz_max{0.0};
+};
+
 class SpotArmInterface {
 public:
     SpotArmInterface();
@@ -95,7 +108,7 @@ private:
     // Move duration tracking
     double move_duration_tracking;
     // Move spot body enabled
-    bool move_spot_body_enabled;
+    SpotMotionMode spot_motion_mode;
     // Hand bounding box
     BoundingBox3D hand_bbox;
     // Enable/disable spot commands
@@ -104,6 +117,8 @@ private:
     bool reset_on_next_pose;
     // Use body pose action interface
     bool action_interface;
+    // Angle limits (ROTATION mode only)
+    AngleLimits angle_limits;
 
     //// State
     // Spot body to origin pose (T_B^O)

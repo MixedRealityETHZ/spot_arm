@@ -5,7 +5,21 @@
 
 #include "spot_arm_interface/conversion.hpp"
 
+
+
 namespace spot_arm_interface {
+
+SpotMotionMode to_spot_motion_mode(const std::string& spot_motion_mode) {
+    if (spot_motion_mode == "STATIC") {
+        return SpotMotionMode::STATIC;
+    } else if (spot_motion_mode == "TRANSLATION") {
+        return SpotMotionMode::TRANSLATION;
+    } else if (spot_motion_mode == "ROTATION") {
+        return SpotMotionMode::ROTATION;
+    } else {
+        throw std::runtime_error("Unhandled spot motion mode \"" + spot_motion_mode + "\"");
+    }
+}
 
 SpotArmInterface::SpotArmInterface()
     : nh("~"),
@@ -32,7 +46,7 @@ SpotArmInterface::SpotArmInterface()
     nh.param<std::string>("body_origin_frame", body_origin_frame, "body_origin");
     nh.param<double>("move_duration_initial", move_duration_initial, 0.5);
     nh.param<double>("move_duration_tracking", move_duration_tracking, 0.1);
-    nh.param<bool>("move_spot_body_enabled", move_spot_body_enabled, true);
+    spot_motion_mode = to_spot_motion_mode(nh.param<std::string>("spot_motion_mode", "STATIC"));
     const std::string body_pose_method = nh.param<std::string>("body_pose_method", "ACTION");
     if (body_pose_method == "ACTION") {
         action_interface = true;
@@ -47,6 +61,8 @@ SpotArmInterface::SpotArmInterface()
             nh.param<double>("hand_bbox/size/z", std::numeric_limits<double>::max())};
     hand_bbox = BoundingBox3D(Eigen::Vector3d::Zero(), hand_bbox_size);
     nh.param<bool>("spot_commands_enabled", spot_commands_enabled, true);
+    nh.param<double>("angle_limits/rz/min", angle_limits.rz_min, std::numeric_limits<double>::lowest());
+    nh.param<double>("angle_limits/rz/max", angle_limits.rz_max, std::numeric_limits<double>::max());
 
     // Subscriber to pose messages
     pose_subscriber = nh.subscribe<geometry_msgs::Pose>("input_pose_topic", 1,
@@ -92,7 +108,7 @@ SpotArmInterface::SpotArmInterface()
         request_hand_pose(request_pose, move_duration_initial);
 
         // Wait for spot body movement service
-        if (move_spot_body_enabled) {
+        if (spot_motion_mode != SpotMotionMode::STATIC) {
             ROS_INFO_STREAM("Waiting for Spot trajectory server.");
             spot_body_pose_client.waitForServer();
             ROS_INFO_STREAM("Acquired Spot trajectory server");
@@ -232,7 +248,7 @@ void SpotArmInterface::request_hand_pose_callback(const geometry_msgs::Pose::Con
         reset_to_new.translation() = hand_bbox.closest_valid(reset_to_new.translation());
 
         // Change the transformation from body to origin (T_B^O)
-        if (move_spot_body_enabled) {
+        if (spot_motion_mode == SpotMotionMode::TRANSLATION) {
             // T_B^O = T_R^N * T_OE^O
             body_to_origin = reset_to_new * origin_ext_to_ext.inverse();
 
@@ -240,6 +256,10 @@ void SpotArmInterface::request_hand_pose_callback(const geometry_msgs::Pose::Con
             if (spot_commands_enabled) {
                 command_spot_to_pose(stamp);
             }
+        } else if (spot_motion_mode == SpotMotionMode::ROTATION) {
+            // Get angle-axis representation
+            const Eigen::AngleAxisd rotation{reset_to_new.rotation()};
+            throw std::runtime_error("Not implemented");
         }
     }
 
@@ -274,7 +294,7 @@ bool SpotArmInterface::return_to_origin_callback(std_srvs::Trigger::Request& req
     const ros::Time stamp = ros::Time::now();
 
     // Command spot back to pose
-    if (move_spot_body_enabled) {
+    if (spot_motion_mode == SpotMotionMode::TRANSLATION) {
         if (spot_commands_enabled) {
             command_spot_to_pose(stamp);
         }
