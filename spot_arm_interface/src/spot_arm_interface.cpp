@@ -45,7 +45,7 @@ SpotArmInterface::SpotArmInterface()
     const Eigen::Vector3d hand_bbox_size{nh.param<double>("hand_bbox/size/x", std::numeric_limits<double>::max()),
             nh.param<double>("hand_bbox/size/y", std::numeric_limits<double>::max()),
             nh.param<double>("hand_bbox/size/z", std::numeric_limits<double>::max())};
-    hand_bbox = BoundingBox3D(Eigen::Vector3d::Zero(), hand_bbox_size);
+    hand_bbox = BoundingBox3D(body_to_initial.translation(), hand_bbox_size);
     nh.param<bool>("spot_commands_enabled", spot_commands_enabled, true);
 
     // Subscriber to pose messages
@@ -226,10 +226,16 @@ void SpotArmInterface::request_hand_pose_callback(const geometry_msgs::Pose::Con
     // Obtain command arm pose: T_R^N = T_B^O * T_OE^E
     Eigen::Isometry3d reset_to_new = body_to_origin * origin_ext_to_ext;
 
+    // T_B^N = T_B^I * T_I^R * T_R^N
+    Eigen::Isometry3d body_to_new = body_to_initial * initial_to_reset * reset_to_new;
+
     // Check if invalid
-    if (!hand_bbox.contains(reset_to_new.translation())) {
+    if (!hand_bbox.contains(body_to_new.translation())) {
         // Replace translation with closest valid one
-        reset_to_new.translation() = hand_bbox.closest_valid(reset_to_new.translation());
+        body_to_new.translation() = hand_bbox.closest_valid(body_to_new.translation());
+        
+        // T_R^N = T_R^I * T_I^B * T_B^N
+        reset_to_new = initial_to_reset.inverse() * body_to_initial.inverse() * body_to_new;
 
         // Change the transformation from body to origin (T_B^O)
         if (move_spot_body_enabled) {
@@ -244,7 +250,7 @@ void SpotArmInterface::request_hand_pose_callback(const geometry_msgs::Pose::Con
     }
 
     // Compute transform for arm: T_B^N = T_B^I * T_I^R * T_R^N
-    const Eigen::Isometry3d body_to_new = body_to_initial * initial_to_reset * reset_to_new;
+    body_to_new = body_to_initial * initial_to_reset * reset_to_new;
 
     // Convert to ROS
     const geometry_msgs::Pose pose_request_msg = to_ros<geometry_msgs::Pose>(body_to_new);
