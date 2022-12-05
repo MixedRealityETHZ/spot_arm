@@ -17,7 +17,7 @@ body_origin_frame: "body_origin"
 move_duration_initial: 0.5
 move_duration_tracking: 0.1
 
-spot_motion_mode: "STATIC" # options: STATIC, TRANSLATION, ROTATION
+spot_motion_mode: "TRANSLATION" # options: STATIC, MOTION
 body_pose_method: "ACTION" # options: TOPIC, ACTION
 
 reset_on_start: true
@@ -30,8 +30,14 @@ hand_bbox:
 
 # Currently used only in ROTATION mode, in degrees
 angle_limits:
-  rz:
-    min: -30.0
-    max: 30.0
+  roll:
+    min: -180.0
+    max: 180.0
+  pitch:
+    min: -180.0
+    max: 180.0
+  yaw:
+    min: -180.0
+    max: 180.0
 
-spot_commands_enabled: true
+spot_commands_enabled: false

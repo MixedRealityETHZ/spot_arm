@@ -20,15 +20,18 @@ namespace spot_arm_interface {
 
 enum SpotMotionMode {
     STATIC,
-    TRANSLATION,
-    ROTATION
+    MOTION
 };
 
 SpotMotionMode to_spot_motion_mode(const std::string& spot_motion_mode);
 
 struct AngleLimits {
-    double rz_min{0.0};
-    double rz_max{0.0};
+    double roll_min{0.0};
+    double roll_max{0.0};
+    double pitch_min{0.0};
+    double pitch_max{0.0};
+    double yaw_min{0.0};
+    double yaw_max{0.0};
 };
 
 class SpotArmInterface {
