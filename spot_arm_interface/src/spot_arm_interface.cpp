@@ -152,6 +152,12 @@ void SpotArmInterface::publish_body_origin_tf(const ros::Time& stamp) {
     transform_stamped.header.frame_id = odom_frame;
     transform_stamped.child_frame_id = body_origin_frame;
     static_broadcaster.sendTransform(transform_stamped);
+    ROS_INFO_STREAM("Published new body origin:\n"
+                    << "t (xyz): " << transform_stamped.transform.translation.x << " "
+                    << transform_stamped.transform.translation.y << " " << transform_stamped.transform.translation.z
+                    << "\nq (xyzw): " << transform_stamped.transform.rotation.x << " "
+                    << transform_stamped.transform.rotation.y << " " << transform_stamped.transform.rotation.z << " "
+                    << transform_stamped.transform.rotation.w);
 }
 
 void SpotArmInterface::report_loop() {
@@ -229,25 +235,13 @@ void SpotArmInterface::request_hand_pose_callback(const geometry_msgs::Pose::Con
     // Compute T_I^N = T_B^O * T_R^E
     Eigen::Isometry3d initial_to_new = body_to_origin * reset_to_ext;
 
-    // // Obtain command arm pose: T_R^N = T_B^O * T_OE^E
-    // Eigen::Isometry3d reset_to_new = body_to_origin * origin_ext_to_ext;
-
-    // // T_B^N = T_B^I * T_I^R * T_R^N
-    // Eigen::Isometry3d body_to_new = body_to_initial * initial_to_reset * reset_to_new;
-
     // Check if invalid
     if (!hand_bbox.contains(initial_to_new.translation())) {
         // Replace translation with closest valid one
         initial_to_new.translation() = hand_bbox.closest_valid(initial_to_new.translation());
-        
-        // // T_R^N = T_R^I * T_I^B * T_B^N
-        // reset_to_new = initial_to_reset.inverse() * body_to_initial.inverse() * body_to_new;
 
         // Change the transformation from body to origin (T_B^O)
         if (move_spot_body_enabled) {
-            // // T_B^O = T_R^N * T_OE^O
-            // body_to_origin = reset_to_new * origin_ext_to_ext.inverse();
-
             // T_B^O = T_I^N * T_E^R
             body_to_origin = initial_to_new * reset_to_ext.inverse();
 
@@ -257,9 +251,6 @@ void SpotArmInterface::request_hand_pose_callback(const geometry_msgs::Pose::Con
             }
         }
     }
-
-    // // Compute transform for arm: T_B^N = T_B^I * T_I^R * T_R^N
-    // body_to_new = body_to_initial * initial_to_reset * reset_to_new;
 
     // Compute transform for arm
     Eigen::Isometry3d body_to_new = body_to_initial * initial_to_new;
@@ -286,9 +277,9 @@ void SpotArmInterface::request_reset_callback(const geometry_msgs::Pose::ConstPt
             Eigen::Quaterniond(pose->orientation.w, pose->orientation.x, pose->orientation.y, pose->orientation.z)
                     .normalized();
     reset_to_origin_ext = origin_ext_to_ext.inverse();
-    // T_I^R = (T_B^{BO} T_OE^E)^{-1}
-    // initial_to_reset = (body_to_origin * origin_ext_to_ext).inverse();
-    // ROS_INFO_STREAM("Resetting arm to initial position. T_I^R = \n" << initial_to_reset.matrix());
+    ROS_INFO_STREAM("Resetting arm to initial position. T_R^OE:\n" << reset_to_origin_ext.matrix());
+
+    // Make next movement slow
     move_to_reset = true;
 }
 
