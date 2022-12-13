@@ -5,6 +5,12 @@ Tele-operation of Spot Robot arm using Hololens 2
 
 * `spot_ros` at [https://github.com/willat343/spot_ros](https://github.com/willat343/spot_ros).
 
+Make sure that the estop gentle command is in the terminal, ready to be called when the robot starts working improperly:
+
+```bash
+rosservice call /spot/estop/gentle
+```
+
 ## Build
 
 Clone this repository to your `catkin_ws`:
@@ -21,14 +27,16 @@ This is a ROS package for controlling the Spot arm from a stream of `geometry_ms
 
 ### Usage
 
-First the `spot_ros` driver must be running on the robot, replacing PASSWORD with the spot password.
+First the `spot_ros` driver must be running on the robot, replacing PASSWORD with the spot password. Source the correct workspace and run the roslaunch.
 
 ```bash
+source ws/devel/setup.bash
 roslaunch spot_driver driver.launch hostname:=192.168.50.3 username:=admin password:=PASSWORD max_linear_velocity_x:=1.0 max_linear_velocity_y:=1.0 max_angular_velocity_z:=1.0
 ```
 
 Also launch the tcp endpoint with default args:
 ```bash
+source ws/devel/setup.bash
 roslaunch ros_tcp_endpoint endpoint.launch
 ```
 
@@ -37,14 +45,22 @@ To configure your local machine to see Spot as the ROS master. Run `hostname -I`
 export ROS_MASTER_URI=http://192.168.1.243:11311
 export ROS_IP=<local_ip_address>
 ```
+To launch the camera compressed stream, run the following commands:
+```bash
+source ws/devel/setup.bash
+roslaunch spot_arm_interface spot_arm_camera_republish.launch
+```
+
 
 To launch the arm interface, optionally turning `rviz` on:
 ```bash
+source ws/devel/setup.bash
 roslaunch spot_arm_interface spot_arm_interface.launch rviz:=false
 ```
 
 To launch the Unity to ROS pose transformation node:
 ```bash
+source ws/devel/setup.bash
 rosrun unity_transform unity_to_ros_pose.py
 ```
 
